@@ -29,3 +29,119 @@
 #encoding: utf-8
 
 Feature: Mathematical4 - Multiplication
+
+  Scenario Outline: [1] Multiplication by zero
+    When executing query:
+      """
+      RETURN <lhs> * <rhs> as result
+      """
+    Then the result should be, in any order:
+    | result     |
+    | <expected> |
+
+    Examples:
+      | lhs | rhs | expected |
+      | 0   | 0   | 0        |
+      | -1  | 0   | 0        |
+      | -1  | 0   | 0        |
+      | 0   | -1  | 0        |
+      | 1   | 0   | 0        |
+      | 0   | 1   | 0        |
+
+  Scenario Outline: [2] Multiplication by rotation
+    When executing query:
+      """
+      RETURN <lhs> * <rhs> as result
+      """
+    Then the result should be, in any order:
+      | result     |
+      | <expected> |
+
+    Examples:
+      | lhs | rhs | expected |
+      | -1  | -1  | 1        |
+      | -1  | 1   | -1       |
+      | 1   | -1  | -1       |
+      | 1   | 1   | 1        |
+
+  Scenario Outline: [3] Multiplication by large numbers
+    When executing query:
+      """
+      RETURN <lhs> * <rhs> as result
+      """
+    Then the result should be, in any order:
+      | result     |
+      | <expected> |
+
+    Examples:
+      | lhs                 | rhs         | expected             |
+      | -4294967296         | 2147483648  | -9223372036854775808 |
+      | 4611686018427387903 | 2           | 9223372036854775806  |
+
+  Scenario Outline: [4] Fail when product exceeds maximum / minimum integer
+    When executing query:
+      """
+      RETURN <lhs> * <rhs>
+      """
+    Then a SyntaxError should be raised at runtime: *
+
+    Examples:
+      | lhs         | rhs         |
+      | 4294967296  | 2147483648  |
+      | -4294967296 | 2147483649  |
+
+  Scenario Outline: [5] Multiplication by mixed types
+    When executing query:
+      """
+      RETURN <lhs> * <rhs> as result
+      """
+    Then the result should be, in any order:
+      | result     |
+      | <expected> |
+
+    Examples:
+      | lhs     | rhs   | expected  |
+      | 1024    | 2     | 2048      |
+      | 1024    | 2.0   | 2048.0    |
+      | 1024    | 2e0   | 2048.0    |
+      | 1024    | 0x2   | 2048      |
+      | 1024    | 0o2   | 2048      |
+      | 1024.0  | 2.0   | 2048.0    |
+      | 1024.0  | 2e0   | 2048.0    |
+      | 1024.0  | 0x2   | 2048.0    |
+      | 1024.0  | 0o2   | 2048.0    |
+      | 1.024e3 | 2e0   | 2048.0    |
+      | 1.024e3 | 0x2   | 2048.0    |
+      | 1.024e3 | 0o2   | 2048.0    |
+      | 0x400   | 0x2   | 2048      |
+      | 0x400   | 0o2   | 2048      |
+      | 0o2000  | 0o2   | 2048      |
+
+  Scenario Outline: [6] Multiplication with invalid types
+    When executing query:
+      """
+      RETURN <lhs> * <rhs>
+      """
+    Then a SyntaxError should be raised at compile time: InvalidArgumentType
+
+    Examples:
+      | lhs | rhs     |
+      | 1   | 'abc'   |
+      | 1   | false   |
+      | 1   | [1]     |
+      | 1   | {}      |
+
+  Scenario Outline: [7] Multiplication with null
+    When executing query:
+      """
+      RETURN <lhs> * <rhs> as result
+      """
+    Then the result should be, in any order:
+      | result     |
+      | <expected> |
+
+    Examples:
+      | lhs     | rhs   | expected  |
+      | 1       | null  | null      |
+      | null    | 1     | null      |
+      | null    | null  | null      |
